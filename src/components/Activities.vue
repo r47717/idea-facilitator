@@ -3,7 +3,7 @@
     <h1>My Activities</h1>
     <v-row class="mt-5">
       <v-col v-for="phase in phases" :key="phase.name">
-        <v-card>
+        <v-card class="phase-card">
           <v-card-title class="justify-center gray--text">
             {{ phase.name }}
           </v-card-title>
@@ -14,77 +14,120 @@
             <v-btn
               fab
               x-small
-              class="success d-flex ma-auto"
-              @click.stop="newIdeaDialog = true"
+              class="success d-flex ma-auto mb-4"
+              @click.stop="newIdeaDialogOpen = true"
               v-if="phase.id === 1"
             >
               <v-icon>mdi-plus</v-icon>
             </v-btn>
             <v-sheet>
               <v-list>
-                <v-list-item v-for="idea in phaseList(phase.id)" :key="idea.id">
-                  <v-card class="flex-grow-1 ma-1">
-                    <v-card-title>
-                      <v-btn plain @click.stop="showActivityDialog(idea.id)">{{
-                        idea.name
-                      }}</v-btn>
-                    </v-card-title>
-                    <v-card-actions class="justify-center pb-4">
-                      <v-btn
-                        fab
-                        x-small
-                        v-if="idea.phase > 1"
-                        @click="moveIdeaLeft(idea)"
+                <v-slide-y-transition class="py-0" group>
+                  <v-list-item
+                    v-for="idea in phaseList(phase.id)"
+                    :key="idea.id"
+                  >
+                    <v-card class="flex-grow-1 ma-1">
+                      <v-icon
+                        v-if="idea.archived"
+                        class="grey--text text--lighten-2 achived-idea-icon"
+                        >mdi-archive</v-icon
                       >
-                        <v-icon>mdi-arrow-left</v-icon>
-                      </v-btn>
-                      <v-btn
-                        fab
-                        x-small
-                        v-if="idea.phase < phases.length"
-                        @click="moveIdeaRight(idea)"
-                      >
-                        <v-icon>mdi-arrow-right</v-icon>
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-list-item>
+                      <v-card-title>
+                        <v-btn plain @click.stop="showIdeaDialog(idea.id)">
+                          {{ idea.name }}
+                        </v-btn>
+                      </v-card-title>
+                      <v-card-actions class="justify-center pb-4">
+                        <v-btn
+                          fab
+                          x-small
+                          v-if="idea.phase > 1"
+                          @click="moveIdeaLeft(idea)"
+                        >
+                          <v-icon>mdi-arrow-left</v-icon>
+                        </v-btn>
+                        <v-btn
+                          fab
+                          x-small
+                          v-if="idea.phase < phases.length"
+                          @click="moveIdeaRight(idea)"
+                        >
+                          <v-icon>mdi-arrow-right</v-icon>
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-list-item>
+                </v-slide-y-transition>
               </v-list>
             </v-sheet>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
+    <v-row>
+      <v-sheet class="pl-2">
+        <v-checkbox v-model="showArchived">
+          <template v-slot:label>Show archived</template>
+        </v-checkbox>
+      </v-sheet>
+    </v-row>
 
-    <v-dialog v-model="dialog" width="500">
+    <!-- edit existing idea  -->
+
+    <v-dialog
+      v-model="ideaDialogOpen"
+      width="500"
+      transition="scale-transition"
+    >
       <v-card>
         <v-card-title class="headline grey lighten-2">
-          {{ dialogActivity ? dialogActivity.name : null }}
+          {{ ideaInDialog ? ideaInDialog.name : null }}
         </v-card-title>
 
         <v-card-text class="mt-5">
-          {{ dialogActivity ? dialogActivity.description : null }}
+          {{ ideaInDialog ? ideaInDialog.description : null }}
+          <v-form v-model="ideaForm.valid" ref="ideaForm">
+            <v-text-field
+              v-model="ideaForm.title"
+              :rules="ideaForm.rules.title"
+              label="Name"
+            ></v-text-field>
+            <v-textarea
+              v-model="ideaForm.description"
+              label="Description"
+            ></v-textarea>
+          </v-form>
         </v-card-text>
 
         <v-divider></v-divider>
 
         <v-card-actions>
+          <v-btn color="primary" text @click="onSaveIdea">
+            <v-icon>mdi-close</v-icon><span>Save & Close</span>
+          </v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="dialog = false">
-            Close
+          <v-btn color="success" text @click="onArchiveIdea()">
+            <v-icon>mdi-archive</v-icon>
+            <span v-if="ideaInDialog && !ideaInDialog.archived">
+              Archive idea
+            </span>
+            <span v-else>Unarchive idea</span>
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="newIdeaDialog" width="500">
+    <!-- add a new idea -->
+
+    <v-dialog v-model="newIdeaDialogOpen" width="500">
       <v-card>
         <v-card-title class="headline grey lighten-2">
           Create New Idea
         </v-card-title>
 
         <v-card-text class="mt-5">
-          <v-form v-model="newIdeaForm.valid" ref="form">
+          <v-form v-model="newIdeaForm.valid" ref="newIdeaForm">
             <v-text-field
               v-model="newIdeaForm.title"
               :rules="newIdeaForm.rules.title"
@@ -101,10 +144,10 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click.stop="onFormSubmit">
+          <v-btn color="primary" text @click.stop="onNewIdeaFormSubmit">
             <v-icon>mdi-check</v-icon>
           </v-btn>
-          <v-btn color="warning" text @click.stop="newIdeaDialog = false">
+          <v-btn color="warning" text @click.stop="newIdeaDialogOpen = false">
             <v-icon>mdi-cancel</v-icon>
           </v-btn>
         </v-card-actions>
@@ -120,8 +163,8 @@ export default {
       phases: [
         {
           id: 1,
-          name: "Fresh idea",
-          description: "Just some new thoughts",
+          name: "Inbox",
+          description: "New ideas come here",
         },
         {
           id: 2,
@@ -130,19 +173,18 @@ export default {
         },
         {
           id: 3,
-          name: "Prototype",
-          description: "First quick prototype is in progress or done",
+          name: "Prototyping",
+          description: "First prototype is in progress",
         },
         {
           id: 4,
-          name: "Development",
+          name: "Developing",
           description: "Idea is approved and is under development",
         },
         {
           id: 5,
-          name: "Deployed",
-          description:
-            "Idea has been implemented and is under support and enhancements",
+          name: "Deploying",
+          description: "Idea has been implemented",
         },
       ],
       ideas: [
@@ -184,14 +226,23 @@ export default {
         {
           id: 6,
           name: "idea #6",
-          description:
-            "lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem",
+          description: "Laboris non et fugiat anim laborum Lorem irure.",
           phase: 4,
+          archived: true,
         },
       ],
-      dialog: false,
-      dialogActivity: null,
-      newIdeaDialog: false,
+      showArchived: true,
+      ideaDialogOpen: false,
+      ideaInDialog: null,
+      newIdeaDialogOpen: false,
+      ideaForm: {
+        valid: false,
+        title: "",
+        description: "",
+        rules: {
+          title: [(v) => !!(v && v.trim()) || "Name is required"],
+        },
+      },
       newIdeaForm: {
         valid: false,
         title: "",
@@ -204,7 +255,9 @@ export default {
   },
   methods: {
     phaseList(id) {
-      return this.ideas.filter((idea) => idea.phase === id);
+      return this.ideas.filter(
+        (idea) => idea.phase === id && (this.showArchived || !idea.archived)
+      );
     },
     moveIdeaRight(idea) {
       idea.phase = Math.min(idea.phase + 1, this.phases.length);
@@ -212,13 +265,26 @@ export default {
     moveIdeaLeft(idea) {
       idea.phase = Math.max(idea.phase - 1, 1);
     },
-    showActivityDialog(id) {
-      this.dialog = true;
-      this.dialogActivity = this.ideas.find((idea) => idea.id === id);
+    showIdeaDialog(id) {
+      this.ideaDialogOpen = true;
+      this.ideaInDialog = this.ideas.find((idea) => idea.id === id);
+      this.ideaForm.title = this.ideaInDialog.name;
+      this.ideaForm.description = this.ideaInDialog.description;
     },
-    onFormSubmit() {
-      if (this.$refs.form.validate()) {
-        this.newIdeaDialog = false;
+    onSaveIdea() {
+      if (this.$refs.ideaForm.validate()) {
+        this.ideaDialogOpen = false;
+        this.ideaInDialog.name = this.ideaForm.title;
+        this.ideaInDialog.description = this.ideaForm.description;
+      }
+    },
+    onArchiveIdea() {
+      this.ideaInDialog.archived = !this.ideaInDialog.archived;
+      this.ideaDialogOpen = false;
+    },
+    onNewIdeaFormSubmit() {
+      if (this.$refs.newIdeaForm.validate()) {
+        this.newIdeaDialogOpen = false;
         this.ideas.push({
           name: this.newIdeaForm.title,
           description: this.newIdeaForm.description,
@@ -230,3 +296,22 @@ export default {
   },
 };
 </script>
+
+<style scoped lang="scss">
+.phase-card {
+  min-width: 200px;
+}
+
+.achived-idea-icon {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 25px;
+  border: 1px solid #e0e0e0;
+  background: #ffffff;
+  padding: 4px;
+  border-radius: 50%;
+  border-top-left-radius: 50% !important;
+  border-top-right-radius: 50% !important;
+}
+</style>
