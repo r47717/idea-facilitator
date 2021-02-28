@@ -1,8 +1,9 @@
 import Vue from "vue";
 import Router from "vue-router";
-import Home from "./components/Home";
 import Activities from "./components/Activities";
+import Activity from "./components/Activity";
 import Profile from "./components/Profile";
+import Archive from "./components/Archive";
 
 Vue.use(Router);
 
@@ -12,13 +13,18 @@ export default new Router({
   routes: [
     {
       path: "/",
-      name: "home",
-      component: Home,
-    },
-    {
-      path: "/activities",
       name: "activities",
       component: Activities,
+    },
+    {
+      path: "/activity/:id",
+      name: "activity",
+      component: Activity,
+    },
+    {
+      path: "/archive",
+      name: "archive",
+      component: Archive,
     },
     {
       path: "/profile",

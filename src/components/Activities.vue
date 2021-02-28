@@ -28,13 +28,8 @@
                     :key="idea.id"
                   >
                     <v-card class="flex-grow-1 ma-1">
-                      <v-icon
-                        v-if="idea.archived"
-                        class="grey--text text--lighten-2 achived-idea-icon"
-                        >mdi-archive</v-icon
-                      >
                       <v-card-title>
-                        <v-btn plain @click.stop="showIdeaDialog(idea.id)">
+                        <v-btn plain :to="`/activity/${idea.id}`">
                           {{ idea.name }}
                         </v-btn>
                       </v-card-title>
@@ -65,60 +60,8 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-row>
-      <v-sheet class="pl-2">
-        <v-checkbox v-model="showArchived">
-          <template v-slot:label>Show archived</template>
-        </v-checkbox>
-      </v-sheet>
-    </v-row>
 
-    <!-- edit existing idea  -->
-
-    <v-dialog
-      v-model="ideaDialogOpen"
-      width="500"
-      transition="scale-transition"
-    >
-      <v-card>
-        <v-card-title class="headline grey lighten-2">
-          {{ ideaInDialog ? ideaInDialog.name : null }}
-        </v-card-title>
-
-        <v-card-text class="mt-5">
-          {{ ideaInDialog ? ideaInDialog.description : null }}
-          <v-form v-model="ideaForm.valid" ref="ideaForm">
-            <v-text-field
-              v-model="ideaForm.title"
-              :rules="ideaForm.rules.title"
-              label="Name"
-            ></v-text-field>
-            <v-textarea
-              v-model="ideaForm.description"
-              label="Description"
-            ></v-textarea>
-          </v-form>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-btn color="primary" text @click="onSaveIdea">
-            <v-icon>mdi-close</v-icon><span>Save & Close</span>
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn color="success" text @click="onArchiveIdea()">
-            <v-icon>mdi-archive</v-icon>
-            <span v-if="ideaInDialog && !ideaInDialog.archived">
-              Archive idea
-            </span>
-            <span v-else>Unarchive idea</span>
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- add a new idea -->
+    <!-- add new idea dialog -->
 
     <v-dialog v-model="newIdeaDialogOpen" width="500">
       <v-card>
@@ -157,6 +100,8 @@
 </template>
 
 <script>
+import { addNewActivity, getActivities, updateActivity } from "../services";
+
 export default {
   data() {
     return {
@@ -168,81 +113,22 @@ export default {
         },
         {
           id: 2,
-          name: "Considering",
+          name: "Consider",
           description: "First thoughts on the idea",
         },
         {
           id: 3,
-          name: "Prototyping",
+          name: "Prototype",
           description: "First prototype is in progress",
         },
         {
           id: 4,
-          name: "Developing",
+          name: "Develop",
           description: "Idea is approved and is under development",
         },
-        {
-          id: 5,
-          name: "Deploying",
-          description: "Idea has been implemented",
-        },
       ],
-      ideas: [
-        {
-          id: 1,
-          name: "idea #1",
-          description:
-            "lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem",
-          phase: 1,
-        },
-        {
-          id: 2,
-          name: "idea #2",
-          description:
-            "lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem",
-          phase: 1,
-        },
-        {
-          id: 3,
-          name: "idea #3",
-          description:
-            "lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem",
-          phase: 1,
-        },
-        {
-          id: 4,
-          name: "idea #4",
-          description:
-            "lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem",
-          phase: 2,
-        },
-        {
-          id: 5,
-          name: "idea #5",
-          description:
-            "lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem",
-          phase: 3,
-        },
-        {
-          id: 6,
-          name: "idea #6",
-          description: "Laboris non et fugiat anim laborum Lorem irure.",
-          phase: 4,
-          archived: true,
-        },
-      ],
-      showArchived: true,
-      ideaDialogOpen: false,
-      ideaInDialog: null,
+      ideas: [],
       newIdeaDialogOpen: false,
-      ideaForm: {
-        valid: false,
-        title: "",
-        description: "",
-        rules: {
-          title: [(v) => !!(v && v.trim()) || "Name is required"],
-        },
-      },
       newIdeaForm: {
         valid: false,
         title: "",
@@ -253,44 +139,39 @@ export default {
       },
     };
   },
+
+  async mounted() {
+    this.ideas = await getActivities();
+  },
+
   methods: {
     phaseList(id) {
       return this.ideas.filter(
         (idea) => idea.phase === id && (this.showArchived || !idea.archived)
       );
     },
-    moveIdeaRight(idea) {
-      idea.phase = Math.min(idea.phase + 1, this.phases.length);
+
+    async moveIdeaRight(idea) {
+      const newPhase = Math.min(idea.phase + 1, this.phases.length);
+      await updateActivity(idea.id, { phase: newPhase });
+      this.ideas = await getActivities();
     },
-    moveIdeaLeft(idea) {
-      idea.phase = Math.max(idea.phase - 1, 1);
+
+    async moveIdeaLeft(idea) {
+      const newPhase = Math.max(idea.phase - 1, 1);
+      await updateActivity(idea.id, { phase: newPhase });
+      this.ideas = await getActivities();
     },
-    showIdeaDialog(id) {
-      this.ideaDialogOpen = true;
-      this.ideaInDialog = this.ideas.find((idea) => idea.id === id);
-      this.ideaForm.title = this.ideaInDialog.name;
-      this.ideaForm.description = this.ideaInDialog.description;
-    },
-    onSaveIdea() {
-      if (this.$refs.ideaForm.validate()) {
-        this.ideaDialogOpen = false;
-        this.ideaInDialog.name = this.ideaForm.title;
-        this.ideaInDialog.description = this.ideaForm.description;
-      }
-    },
-    onArchiveIdea() {
-      this.ideaInDialog.archived = !this.ideaInDialog.archived;
-      this.ideaDialogOpen = false;
-    },
-    onNewIdeaFormSubmit() {
+
+    async onNewIdeaFormSubmit() {
       if (this.$refs.newIdeaForm.validate()) {
         this.newIdeaDialogOpen = false;
-        this.ideas.push({
+        await addNewActivity({
           name: this.newIdeaForm.title,
           description: this.newIdeaForm.description,
           phase: 1,
-          id: this.ideas[this.ideas.length - 1].id + 1,
         });
+        this.ideas = await getActivities();
       }
     },
   },
@@ -300,18 +181,5 @@ export default {
 <style scoped lang="scss">
 .phase-card {
   min-width: 200px;
-}
-
-.achived-idea-icon {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  font-size: 25px;
-  border: 1px solid #e0e0e0;
-  background: #ffffff;
-  padding: 4px;
-  border-radius: 50%;
-  border-top-left-radius: 50% !important;
-  border-top-right-radius: 50% !important;
 }
 </style>

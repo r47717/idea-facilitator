@@ -1,8 +1,9 @@
 <template>
   <v-app>
     <v-app-bar app color="primary" dark>
-      <div class="d-flex align-center">
-        <v-btn left plain @click="toggleMenu"><v-icon>mdi-menu</v-icon></v-btn>
+      <v-btn left plain @click="toggleMenu"><v-icon>mdi-menu</v-icon></v-btn>
+
+      <router-link to="/" class="d-flex align-center white--text">
         <v-img
           alt="Vuetify Logo"
           class="shrink mr-2"
@@ -13,7 +14,7 @@
         />
 
         <v-app-bar-title>{{ productName }}</v-app-bar-title>
-      </div>
+      </router-link>
 
       <v-spacer></v-spacer>
 
@@ -55,13 +56,17 @@ export default {
     productName: "Facilitator",
     menuVisible: false,
     menuItems: [
-      { text: "Dashboard", icon: "mdi-view-dashboard", route: "/" },
       {
-        text: "My Activities",
-        icon: "mdi-calendar-multiple-check",
-        route: "/activities",
+        text: "Activities Board",
+        icon: "mdi-star-four-points",
+        route: "/",
       },
-      { text: "My Profile", icon: "mdi-account", route: "/profile" },
+      {
+        text: "Archive",
+        icon: "mdi-archive",
+        route: "/archive",
+      },
+      { text: "Profile", icon: "mdi-account", route: "/profile" },
     ],
   }),
 
