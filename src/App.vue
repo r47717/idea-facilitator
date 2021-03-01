@@ -26,15 +26,10 @@
 
     <v-navigation-drawer app left color="blue lighten-1" v-model="menuVisible">
       <v-list>
-        <v-list-item
-          v-for="menuItem in menuItems"
-          :key="menuItem.text"
-          router
-          :to="menuItem.route"
-        >
+        <v-list-item key="Activities Board" router to="/">
           <v-list-item-title class="white--text d-flex align-center">
-            <v-icon left color="white">{{ menuItem.icon }}</v-icon>
-            <span class="d-inline-block ml-5">{{ menuItem.text }}</span>
+            <v-icon left color="white">mdi-star-four-points</v-icon>
+            <span class="d-inline-block ml-5">Activities</span>
           </v-list-item-title>
         </v-list-item>
 
@@ -54,6 +49,20 @@
           <v-list-item-title class="white--text d-flex align-center">
             <v-icon left color="white">mdi-pin</v-icon>
             <span class="d-inline-block ml-5">{{ pinnedItem.name }}</span>
+          </v-list-item-title>
+        </v-list-item>
+
+        <v-divider
+          v-if="pinnedItems.length > 0"
+          key="devider"
+          class="my-5"
+          color="white"
+        ></v-divider>
+
+        <v-list-item key="Archive" router to="/archive">
+          <v-list-item-title class="white--text d-flex align-center">
+            <v-icon left color="white">mdi-archive</v-icon>
+            <span class="d-inline-block ml-5">Archived activities</span>
           </v-list-item-title>
         </v-list-item>
       </v-list>

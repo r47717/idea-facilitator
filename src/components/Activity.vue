@@ -1,32 +1,57 @@
 <template>
   <v-container>
-    <v-form v-model="valid" ref="form">
-      <v-text-field
-        v-model="form.name"
-        label="Name"
-        :rules="rules.name"
-      ></v-text-field>
+    <v-tabs v-model="tab">
+      <v-tab>General</v-tab>
+      <v-tab>Tasks</v-tab>
+    </v-tabs>
 
-      <v-textarea v-model="form.description" label="Description"></v-textarea>
+    <v-tabs-items v-model="tab">
+      <v-tab-item key="general" transition="false">
+        <v-sheet class="pa-5">
+          <v-form v-model="valid" ref="form">
+            <v-text-field
+              v-model="form.name"
+              label="Name"
+              :rules="rules.name"
+            ></v-text-field>
 
-      <v-checkbox v-model="form.archived">
-        <template v-slot:label>Archived</template>
-      </v-checkbox>
+            <v-textarea
+              v-model="form.description"
+              label="Description"
+            ></v-textarea>
 
-      <v-checkbox v-model="form.pinned">
-        <template v-slot:label>Pinned</template>
-      </v-checkbox>
+            <v-checkbox v-model="form.archived">
+              <template v-slot:label>Archived</template>
+            </v-checkbox>
 
-      <div class="d-flex mt-5">
-        <v-btn class="success" left text @click.stop="onSaveChanges"
-          >Save changes</v-btn
-        >
-        <v-spacer></v-spacer>
-        <v-btn class="error" right text @click.stop="onResetChanges">
-          Reset changes
-        </v-btn>
-      </div>
-    </v-form>
+            <v-checkbox v-model="form.pinned">
+              <template v-slot:label>Pinned</template>
+            </v-checkbox>
+
+            <div class="d-flex mt-5">
+              <v-btn class="success" left text @click.stop="onSaveChanges"
+                >Save changes</v-btn
+              >
+              <v-spacer></v-spacer>
+              <v-btn class="error" right text @click.stop="onResetChanges">
+                Reset changes
+              </v-btn>
+            </div>
+          </v-form>
+        </v-sheet>
+      </v-tab-item>
+
+      <v-tab-item key="tasks" transition="false">
+        <v-sheet class="pa-5">
+          <v-data-table
+            :headers="tasks.headers"
+            :items="tasks.items"
+            items-per-page="5"
+            class="elevation-1"
+          ></v-data-table>
+        </v-sheet>
+      </v-tab-item>
+    </v-tabs-items>
 
     <v-snackbar v-model="snackbar" color="success">
       {{ snackBarText }}
@@ -40,7 +65,11 @@
 </template>
 
 <script>
-import { getActivityById, updateActivity } from "../services";
+import {
+  getActivityById,
+  getTasksByActivity,
+  updateActivity,
+} from "../services";
 export default {
   data() {
     return {
@@ -52,6 +81,7 @@ export default {
         archived: false,
         pinned: false,
       },
+      tab: null,
       valid: false,
       form: {
         name: "",
@@ -63,6 +93,14 @@ export default {
       rules: {
         name: [(v) => !!(v && v.trim()) || "Name is required"],
       },
+      tasks: {
+        headers: [
+          { text: "name", value: "name" },
+          { text: "description", value: "description" },
+          { text: "status", value: "status" },
+        ],
+        items: [],
+      },
       snackbar: false,
       snackBarText: "",
     };
@@ -71,6 +109,7 @@ export default {
   async mounted() {
     this.data = await getActivityById(Number(this.$route.params.id));
     this.form = { ...this.data };
+    this.tasks.items = await getTasksByActivity(Number(this.$route.params.id));
   },
 
   methods: {
