@@ -26,6 +26,27 @@
 
     <v-navigation-drawer app left color="blue lighten-1" v-model="menuVisible">
       <v-list>
+        <v-list-item>
+          <v-list-item-avatar class="mx-auto">
+            <v-img :src="profile.avatar"></v-img>
+          </v-list-item-avatar>
+        </v-list-item>
+
+        <v-list-item link>
+          <v-list-item-content>
+            <v-list-item-title class="title">
+              {{ profile.name }}
+            </v-list-item-title>
+            <v-list-item-subtitle>{{ profile.email }}</v-list-item-subtitle>
+          </v-list-item-content>
+
+          <v-list-item-action>
+            <v-icon>mdi-menu-down</v-icon>
+          </v-list-item-action>
+        </v-list-item>
+
+        <v-divider key="devider1" class="my-5" color="white"></v-divider>
+
         <v-list-item key="Activities Board" router to="/">
           <v-list-item-title class="white--text d-flex align-center">
             <v-icon left color="white">mdi-star-four-points</v-icon>
@@ -35,7 +56,7 @@
 
         <v-divider
           v-if="pinnedItems.length > 0"
-          key="devider"
+          key="devider2"
           class="my-5"
           color="white"
         ></v-divider>
@@ -52,12 +73,7 @@
           </v-list-item-title>
         </v-list-item>
 
-        <v-divider
-          v-if="pinnedItems.length > 0"
-          key="devider"
-          class="my-5"
-          color="white"
-        ></v-divider>
+        <v-divider key="devider3" class="my-5" color="white"></v-divider>
 
         <v-list-item key="Archive" router to="/archive">
           <v-list-item-title class="white--text d-flex align-center">
@@ -78,7 +94,7 @@
 </template>
 
 <script>
-import { getPinnedActivities } from "./services";
+import { getPinnedActivities, getProfile } from "./services";
 export default {
   name: "App",
 
@@ -87,24 +103,13 @@ export default {
   data: () => ({
     productName: "Facilitator",
     menuVisible: false,
-    menuItems: [
-      {
-        text: "Activities Board",
-        icon: "mdi-star-four-points",
-        route: "/",
-      },
-      {
-        text: "Archive",
-        icon: "mdi-archive",
-        route: "/archive",
-      },
-      { text: "Profile", icon: "mdi-account", route: "/profile" },
-    ],
+    profile: {},
     pinnedItems: [],
   }),
 
   async mounted() {
     await this.updatePinned();
+    this.profile = await getProfile();
   },
 
   methods: {
