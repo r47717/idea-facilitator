@@ -141,7 +141,9 @@ export default {
   },
 
   async mounted() {
-    this.ideas = await getActivities();
+    this.$api(async () => {
+      this.ideas = await getActivities();
+    });
   },
 
   methods: {
@@ -152,26 +154,32 @@ export default {
     },
 
     async moveIdeaRight(idea) {
-      const newPhase = Math.min(idea.phase + 1, this.phases.length);
-      await updateActivity(idea.id, { phase: newPhase });
-      this.ideas = await getActivities();
+      this.$api(async () => {
+        const newPhase = Math.min(idea.phase + 1, this.phases.length);
+        await updateActivity(idea.id, { phase: newPhase });
+        this.ideas = await getActivities();
+      });
     },
 
     async moveIdeaLeft(idea) {
-      const newPhase = Math.max(idea.phase - 1, 1);
-      await updateActivity(idea.id, { phase: newPhase });
-      this.ideas = await getActivities();
+      this.$api(async () => {
+        const newPhase = Math.max(idea.phase - 1, 1);
+        await updateActivity(idea.id, { phase: newPhase });
+        this.ideas = await getActivities();
+      });
     },
 
     async onNewIdeaFormSubmit() {
       if (this.$refs.newIdeaForm.validate()) {
-        this.newIdeaDialogOpen = false;
-        await addNewActivity({
-          name: this.newIdeaForm.title,
-          description: this.newIdeaForm.description,
-          phase: 1,
+        this.$api(async () => {
+          this.newIdeaDialogOpen = false;
+          await addNewActivity({
+            name: this.newIdeaForm.title,
+            description: this.newIdeaForm.description,
+            phase: 1,
+          });
+          this.ideas = await getActivities();
         });
-        this.ideas = await getActivities();
       }
     },
   },

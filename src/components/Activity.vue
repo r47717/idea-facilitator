@@ -107,20 +107,26 @@ export default {
   },
 
   async mounted() {
-    this.data = await getActivityById(Number(this.$route.params.id));
-    this.form = { ...this.data };
-    this.tasks.items = await getTasksByActivity(Number(this.$route.params.id));
+    this.$api(async () => {
+      this.data = await getActivityById(Number(this.$route.params.id));
+      this.form = { ...this.data };
+      this.tasks.items = await getTasksByActivity(
+        Number(this.$route.params.id)
+      );
+    });
   },
 
   methods: {
     async onSaveChanges() {
       if (this.$refs.form.validate()) {
-        this.snackBarText = "Saving changes...";
-        this.snackbar = true;
-        await updateActivity(this.data.id, this.form);
-        this.data = await getActivityById(Number(this.$route.params.id));
-        this.snackBarText = "Changes saved successfully";
-        this.$emit("updatePinned");
+        this.$api(async () => {
+          this.snackBarText = "Saving changes...";
+          this.snackbar = true;
+          await updateActivity(this.data.id, this.form);
+          this.data = await getActivityById(Number(this.$route.params.id));
+          this.snackBarText = "Changes saved successfully";
+          this.$emit("updatePinned");
+        });
       }
     },
 
@@ -132,8 +138,10 @@ export default {
         }
       );
       if (res) {
-        this.data = await getActivityById(Number(this.$route.params.id));
-        this.form = { ...this.data };
+        this.$api(async () => {
+          this.data = await getActivityById(Number(this.$route.params.id));
+          this.form = { ...this.data };
+        });
       }
     },
   },

@@ -1,6 +1,7 @@
 import Vue from "vue";
 import App from "./App";
 import vuetify from "./plugins/vuetify";
+import loader from "./plugins/loader";
 import router from "./router";
 import VuetifyConfirm from "vuetify-confirm";
 
@@ -25,5 +26,6 @@ Vue.config.devtools = process.env.NODE_ENV === "development";
 new Vue({
   router,
   vuetify,
+  loader,
   render: (h) => h(App),
 }).$mount("#app");

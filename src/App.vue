@@ -84,10 +84,16 @@
       </v-list>
     </v-navigation-drawer>
 
+    <v-overlay :value="loader">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
+
     <v-main>
       <router-view
         :key="$route.fullPath"
         @updatePinned="updatePinned"
+        @loaderOn="loader = true"
+        @loaderOff="loader = false"
       ></router-view>
     </v-main>
   </v-app>
@@ -105,11 +111,14 @@ export default {
     menuVisible: false,
     profile: {},
     pinnedItems: [],
+    loader: false,
   }),
 
   async mounted() {
-    await this.updatePinned();
-    this.profile = await getProfile();
+    this.$api(async () => {
+      await this.updatePinned();
+      this.profile = await getProfile();
+    });
   },
 
   methods: {
@@ -118,7 +127,9 @@ export default {
     },
 
     async updatePinned() {
-      this.pinnedItems = await getPinnedActivities();
+      this.$api(async () => {
+        this.pinnedItems = await getPinnedActivities();
+      });
     },
   },
 };

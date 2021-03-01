@@ -61,17 +61,21 @@ export default {
 
   methods: {
     async updateActivities() {
-      const items = await getArchivedActivities();
-      for (let item of items) {
-        const tasks = await getTasksByActivity(this.items.id);
-        item.tasks = tasks.length;
-      }
-      this.items = items;
+      this.$api(async () => {
+        const items = await getArchivedActivities();
+        for (let item of items) {
+          const tasks = await getTasksByActivity(this.items.id);
+          item.tasks = tasks.length;
+        }
+        this.items = items;
+      });
     },
 
     async onClickUnarchive(item) {
-      await unArchiveActivity(item.id);
-      await this.updateActivities();
+      this.$api(async () => {
+        await unArchiveActivity(item.id);
+        await this.updateActivities();
+      });
     },
   },
 };
