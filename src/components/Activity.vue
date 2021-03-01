@@ -6,16 +6,23 @@
         label="Name"
         :rules="rules.name"
       ></v-text-field>
+
       <v-textarea v-model="form.description" label="Description"></v-textarea>
+
       <v-checkbox v-model="form.archived">
         <template v-slot:label>Archived</template>
       </v-checkbox>
+
+      <v-checkbox v-model="form.pinned">
+        <template v-slot:label>Pinned</template>
+      </v-checkbox>
+
       <div class="d-flex mt-5">
-        <v-btn class="success" left @click.stop="onSaveChanges"
+        <v-btn class="success" left text @click.stop="onSaveChanges"
           >Save changes</v-btn
         >
         <v-spacer></v-spacer>
-        <v-btn class="error" right @click.stop="onResetChanges">
+        <v-btn class="error" right text @click.stop="onResetChanges">
           Reset changes
         </v-btn>
       </div>
@@ -43,6 +50,7 @@ export default {
         description: "",
         phase: 1,
         archived: false,
+        pinned: false,
       },
       valid: false,
       form: {
@@ -50,6 +58,7 @@ export default {
         description: "",
         phase: 1,
         archived: false,
+        pinned: false,
       },
       rules: {
         name: [(v) => !!(v && v.trim()) || "Name is required"],
@@ -72,6 +81,7 @@ export default {
         await updateActivity(this.data.id, this.form);
         this.data = await getActivityById(Number(this.$route.params.id));
         this.snackBarText = "Changes saved successfully";
+        this.$emit("updatePinned");
       }
     },
 

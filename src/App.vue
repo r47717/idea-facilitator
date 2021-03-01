@@ -37,16 +37,39 @@
             <span class="d-inline-block ml-5">{{ menuItem.text }}</span>
           </v-list-item-title>
         </v-list-item>
+
+        <v-divider
+          v-if="pinnedItems.length > 0"
+          key="devider"
+          class="my-5"
+          color="white"
+        ></v-divider>
+
+        <v-list-item
+          v-for="pinnedItem in pinnedItems"
+          :key="pinnedItem.name"
+          router
+          :to="`/activity/${pinnedItem.id}`"
+        >
+          <v-list-item-title class="white--text d-flex align-center">
+            <v-icon left color="white">mdi-pin</v-icon>
+            <span class="d-inline-block ml-5">{{ pinnedItem.name }}</span>
+          </v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
     <v-main>
-      <router-view></router-view>
+      <router-view
+        :key="$route.fullPath"
+        @updatePinned="updatePinned"
+      ></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
+import { getPinnedActivities } from "./services";
 export default {
   name: "App",
 
@@ -68,11 +91,20 @@ export default {
       },
       { text: "Profile", icon: "mdi-account", route: "/profile" },
     ],
+    pinnedItems: [],
   }),
+
+  async mounted() {
+    await this.updatePinned();
+  },
 
   methods: {
     toggleMenu() {
       this.menuVisible = !this.menuVisible;
+    },
+
+    async updatePinned() {
+      this.pinnedItems = await getPinnedActivities();
     },
   },
 };

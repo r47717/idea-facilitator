@@ -12,6 +12,7 @@ const activities = [
     description:
       "lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem",
     phase: 1,
+    archived: true,
   },
   {
     id: 3,
@@ -26,6 +27,7 @@ const activities = [
     description:
       "lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem",
     phase: 2,
+    pinned: true,
   },
   {
     id: 5,
@@ -33,6 +35,7 @@ const activities = [
     description:
       "lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem lorem",
     phase: 3,
+    pinned: true,
   },
   {
     id: 6,
@@ -90,4 +93,26 @@ export async function unArchiveActivity(id) {
   await delay(500);
   const activity = await getActivityById(id);
   activity.archived = false;
+}
+
+export async function getArchivedActivities() {
+  await delay(300);
+  return activities.filter((item) => !!item.archived);
+}
+
+export async function pinActivity(id) {
+  await delay(500);
+  const activity = await getActivityById(id);
+  activity.pinned = true;
+}
+
+export async function unpinActivity(id) {
+  await delay(500);
+  const activity = await getActivityById(id);
+  activity.pinned = false;
+}
+
+export async function getPinnedActivities() {
+  await delay(300);
+  return activities.filter((item) => !!item.pinned);
 }
