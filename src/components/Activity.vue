@@ -8,36 +8,47 @@
     <v-tabs-items v-model="tab">
       <v-tab-item key="general" transition="false">
         <v-sheet class="pa-5">
-          <v-form v-model="valid" ref="form">
-            <v-text-field
-              v-model="form.name"
-              label="Name"
-              :rules="rules.name"
-            ></v-text-field>
+          <v-row>
+            <v-col xs="12" lg="8" xl="6">
+              <v-form v-model="valid" ref="form">
+                <v-text-field
+                  v-model="form.name"
+                  label="Name"
+                  :rules="rules.name"
+                ></v-text-field>
 
-            <v-textarea
-              v-model="form.description"
-              label="Description"
-            ></v-textarea>
+                <v-textarea
+                  v-model="form.description"
+                  label="Description"
+                ></v-textarea>
 
-            <v-checkbox v-model="form.archived">
-              <template v-slot:label>Archived</template>
-            </v-checkbox>
+                <v-select
+                  :items="phases"
+                  label="Phase"
+                  v-model="form.phase"
+                ></v-select>
 
-            <v-checkbox v-model="form.pinned">
-              <template v-slot:label>Pinned</template>
-            </v-checkbox>
+                <v-text-field
+                  v-model="form.repo"
+                  label="Repository URL"
+                ></v-text-field>
 
-            <div class="d-flex mt-5">
-              <v-btn class="success" left text @click.stop="onSaveChanges"
-                >Save changes</v-btn
-              >
-              <v-spacer></v-spacer>
-              <v-btn class="error" right text @click.stop="onResetChanges">
-                Reset changes
-              </v-btn>
-            </div>
-          </v-form>
+                <v-switch v-model="form.archived" label="Archived"> </v-switch>
+
+                <v-switch v-model="form.pinned" label="Pinned"> </v-switch>
+
+                <div class="d-flex mt-5">
+                  <v-btn class="success" left text @click.stop="onSaveChanges"
+                    >Save changes</v-btn
+                  >
+                  <v-spacer></v-spacer>
+                  <v-btn class="error" right text @click.stop="onResetChanges">
+                    Reset changes
+                  </v-btn>
+                </div>
+              </v-form>
+            </v-col>
+          </v-row>
         </v-sheet>
       </v-tab-item>
 
@@ -81,6 +92,28 @@ export default {
         archived: false,
         pinned: false,
       },
+      phases: [
+        {
+          value: 1,
+          text: "Inbox",
+          description: "New ideas come here",
+        },
+        {
+          value: 2,
+          text: "Consider",
+          description: "First thoughts on the idea",
+        },
+        {
+          value: 3,
+          text: "Prototype",
+          description: "First prototype is in progress",
+        },
+        {
+          value: 4,
+          text: "Develop",
+          description: "Idea is approved and is under development",
+        },
+      ],
       tab: null,
       valid: false,
       form: {
