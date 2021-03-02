@@ -81,6 +81,15 @@
             <span class="d-inline-block ml-5">Archived activities</span>
           </v-list-item-title>
         </v-list-item>
+
+        <v-divider key="devider4" class="my-5" color="white"></v-divider>
+
+        <v-list-item key="Export" router to="/export">
+          <v-list-item-title class="white--text d-flex align-center">
+            <v-icon left color="white">mdi-download</v-icon>
+            <span class="d-inline-block ml-5">Export/Import Data</span>
+          </v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
@@ -100,7 +109,7 @@
 </template>
 
 <script>
-import { getPinnedActivities, getProfile } from "./services";
+import { getPinnedActivities, getProfile } from "../services";
 export default {
   name: "App",
 

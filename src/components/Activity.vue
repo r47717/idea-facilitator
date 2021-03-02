@@ -1,5 +1,7 @@
 <template>
   <v-container>
+    <h1>Activity Editor</h1>
+
     <v-tabs v-model="tab">
       <v-tab>General</v-tab>
       <v-tab>Tasks</v-tab>
@@ -54,12 +56,72 @@
 
       <v-tab-item key="tasks" transition="false">
         <v-sheet class="pa-5">
-          <v-data-table
-            :headers="tasks.headers"
-            :items="tasks.items"
-            :items-per-page="5"
-            class="elevation-1"
-          ></v-data-table>
+          <v-simple-table>
+            <thead>
+              <tr>
+                <th
+                  v-for="header in tasks.headers"
+                  :key="header.text"
+                  class="text-left"
+                >
+                  {{ header.text }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="task in tasks.items" :key="task.name">
+                <td>
+                  <v-text-field v-model="task.name"></v-text-field>
+                </td>
+                <td>
+                  <v-text-field v-model="task.description"></v-text-field>
+                </td>
+                <td>
+                  <v-select
+                    v-model="task.status"
+                    :items="tasks.statuses"
+                  ></v-select>
+                </td>
+                <td>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        fab
+                        x-small
+                        elevation="1"
+                        v-bind="attrs"
+                        v-on="on"
+                        class="success mr-2"
+                        @click="onTaskSave(task.id)"
+                      >
+                        <v-icon>mdi-check</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Save task</span>
+                  </v-tooltip>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        fab
+                        x-small
+                        elevation="1"
+                        v-bind="attrs"
+                        v-on="on"
+                        class="error"
+                        @click="onTaskDelete(task.id)"
+                      >
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Delete task</span>
+                  </v-tooltip>
+                </td>
+              </tr>
+            </tbody>
+          </v-simple-table>
+          <v-btn fab small text class="success mt-4" @click="onNewTaskClick">
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
         </v-sheet>
       </v-tab-item>
     </v-tabs-items>
@@ -128,11 +190,13 @@ export default {
       },
       tasks: {
         headers: [
-          { text: "name", value: "name" },
-          { text: "description", value: "description" },
+          { text: "Name", value: "name" },
+          { text: "Description", value: "description" },
           { text: "status", value: "status" },
+          { text: "Actions", value: "actions" },
         ],
         items: [],
+        statuses: ["TODO", "In Progress", "Done"],
       },
       snackbar: false,
       snackBarText: "",
@@ -177,6 +241,41 @@ export default {
         });
       }
     },
+
+    async onTaskDelete(id) {
+      const res = await this.$confirm(
+        "Do you really want to delete the task?",
+        {
+          title: "Delete task?",
+        }
+      );
+      if (res) {
+        console.log(id);
+      }
+    },
+
+    onTaskSave(id) {
+      console.log(id);
+    },
+
+    onNewTaskClick() {
+      this.tasks.items.push({
+        name: "",
+        description: "",
+        status: 1,
+      });
+    },
   },
 };
 </script>
+
+<style lang="scss" scoped>
+/* why do you guys make so specific selectors which are hard to override?? */
+.theme--light.v-data-table
+  > .v-data-table__wrapper
+  > table
+  > tbody
+  > tr:hover:not(.v-data-table__expanded__content):not(.v-data-table__empty-wrapper) {
+  background: #ffffff;
+}
+</style>

@@ -2,8 +2,8 @@ import Vue from "vue";
 import Router from "vue-router";
 import Activities from "./components/Activities";
 import Activity from "./components/Activity";
-import Profile from "./components/Profile";
 import Archive from "./components/Archive";
+import Export from "./components/Export";
 
 Vue.use(Router);
 
@@ -27,9 +27,9 @@ export default new Router({
       component: Archive,
     },
     {
-      path: "/profile",
-      name: "profile",
-      component: Profile,
+      path: "/export",
+      name: "export",
+      component: Export,
     },
   ],
 });
