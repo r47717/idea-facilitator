@@ -3,6 +3,7 @@ import App from "./components/App";
 import vuetify from "./plugins/vuetify";
 import loader from "./plugins/loader";
 import router from "./router";
+import store from "./store";
 import VuetifyConfirm from "vuetify-confirm";
 
 Vue.use(VuetifyConfirm, {
@@ -25,6 +26,7 @@ Vue.config.devtools = process.env.NODE_ENV === "development";
 
 new Vue({
   router,
+  store,
   vuetify,
   loader,
   render: (h) => h(App),

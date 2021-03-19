@@ -18,7 +18,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn plain>
+      <v-btn plain @click="onLogout" v-if="$store.state.authenticated">
         Logout
         <v-icon right>mdi-exit-to-app</v-icon>
       </v-btn>
@@ -138,6 +138,13 @@ export default {
     async updatePinned() {
       this.$api(async () => {
         this.pinnedItems = await getPinnedActivities();
+      });
+    },
+
+    async onLogout() {
+      this.$api(async () => {
+        this.$store.dispatch("logout");
+        this.$router.push("/login");
       });
     },
   },
