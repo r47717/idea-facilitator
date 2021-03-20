@@ -50,8 +50,9 @@ export default {
     async onLogin() {
       if (this.$refs.loginForm.validate()) {
         this.$api(async () => {
-          this.$store.dispatch("login");
-          this.$router.push("/");
+          this.$store.dispatch("login", {
+            name: this.loginForm.name,
+          });
         });
       }
     },

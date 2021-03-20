@@ -1,7 +1,9 @@
 <template>
   <v-app>
     <v-app-bar app color="primary" dark>
-      <v-btn left plain @click="toggleMenu"><v-icon>mdi-menu</v-icon></v-btn>
+      <v-btn left plain @click="toggleMenu" v-if="$store.state.authenticated">
+        <v-icon>mdi-menu</v-icon>
+      </v-btn>
 
       <router-link to="/" class="d-flex align-center white--text">
         <v-img
@@ -24,20 +26,28 @@
       </v-btn>
     </v-app-bar>
 
-    <v-navigation-drawer app left color="blue lighten-1" v-model="menuVisible">
+    <v-navigation-drawer
+      app
+      left
+      color="blue lighten-1"
+      v-model="menuVisible"
+      v-if="$store.state.authenticated"
+    >
       <v-list>
         <v-list-item>
           <v-list-item-avatar class="mx-auto">
-            <v-img :src="profile.avatar"></v-img>
+            <v-img :src="$store.state.user.avatar"></v-img>
           </v-list-item-avatar>
         </v-list-item>
 
         <v-list-item link>
           <v-list-item-content>
             <v-list-item-title class="title">
-              {{ profile.name }}
+              {{ $store.state.user.name }}
             </v-list-item-title>
-            <v-list-item-subtitle>{{ profile.email }}</v-list-item-subtitle>
+            <v-list-item-subtitle>{{
+              $store.state.user.email
+            }}</v-list-item-subtitle>
           </v-list-item-content>
 
           <v-list-item-action>
@@ -109,7 +119,7 @@
 </template>
 
 <script>
-import { getPinnedActivities, getProfile } from "../services";
+import { getPinnedActivities } from "../services";
 export default {
   name: "App",
 
@@ -118,15 +128,15 @@ export default {
   data: () => ({
     productName: "Facilitator",
     menuVisible: false,
-    profile: {},
     pinnedItems: [],
     loader: false,
   }),
 
   async mounted() {
+    this.profile = this.$store.state.user;
+
     this.$api(async () => {
       await this.updatePinned();
-      this.profile = await getProfile();
     });
   },
 
@@ -144,7 +154,6 @@ export default {
     async onLogout() {
       this.$api(async () => {
         this.$store.dispatch("logout");
-        this.$router.push("/login");
       });
     },
   },
