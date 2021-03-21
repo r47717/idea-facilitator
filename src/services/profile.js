@@ -1,4 +1,7 @@
+import { delay } from "./utils";
+
 export async function getProfile() {
+  await delay(300);
   return {
     name: "Jenny Doe",
     email: "email@mycompany.com",

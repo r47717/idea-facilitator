@@ -36,7 +36,7 @@ export default {
     return {
       loginForm: {
         valid: false,
-        name: "",
+        name: "login",
         password: "",
         rules: {
           name: [(v) => !!(v && v.trim()) || "Name is required"],
@@ -49,10 +49,8 @@ export default {
   methods: {
     async onLogin() {
       if (this.$refs.loginForm.validate()) {
-        this.$api(async () => {
-          this.$store.dispatch("login", {
-            name: this.loginForm.name,
-          });
+        this.$store.dispatch("login", {
+          name: this.loginForm.name,
         });
       }
     },

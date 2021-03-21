@@ -100,8 +100,6 @@
 </template>
 
 <script>
-import { addNewActivity, getActivities, updateActivity } from "../services";
-
 export default {
   data() {
     return {
@@ -127,7 +125,6 @@ export default {
           description: "Idea is approved and is under development",
         },
       ],
-      ideas: [],
       newIdeaDialogOpen: false,
       newIdeaForm: {
         valid: false,
@@ -141,44 +138,41 @@ export default {
   },
 
   async mounted() {
-    this.$api(async () => {
-      this.ideas = await getActivities();
-    });
+    this.$store.dispatch("fetchActivities");
   },
 
   methods: {
     phaseList(id) {
-      return this.ideas.filter(
+      return this.$store.state.activities.filter(
         (idea) => idea.phase === id && (this.showArchived || !idea.archived)
       );
     },
 
-    async moveIdeaRight(idea) {
-      this.$api(async () => {
-        const newPhase = Math.min(idea.phase + 1, this.phases.length);
-        await updateActivity(idea.id, { phase: newPhase });
-        this.ideas = await getActivities();
+    moveIdeaRight(idea) {
+      const newPhase = Math.min(idea.phase + 1, this.phases.length);
+      this.$store.dispatch("updateActivity", {
+        id: idea.id,
+        data: { phase: newPhase },
       });
     },
 
-    async moveIdeaLeft(idea) {
-      this.$api(async () => {
-        const newPhase = Math.max(idea.phase - 1, 1);
-        await updateActivity(idea.id, { phase: newPhase });
-        this.ideas = await getActivities();
+    moveIdeaLeft(idea) {
+      const newPhase = Math.max(idea.phase - 1, 1);
+      this.$store.dispatch("updateActivity", {
+        id: idea.id,
+        data: { phase: newPhase },
       });
     },
 
     async onNewIdeaFormSubmit() {
       if (this.$refs.newIdeaForm.validate()) {
-        this.$api(async () => {
-          this.newIdeaDialogOpen = false;
-          await addNewActivity({
+        this.newIdeaDialogOpen = false;
+        this.$store.dispatch("addNewActivity", {
+          data: {
             name: this.newIdeaForm.title,
             description: this.newIdeaForm.description,
             phase: 1,
-          });
-          this.ideas = await getActivities();
+          },
         });
       }
     },

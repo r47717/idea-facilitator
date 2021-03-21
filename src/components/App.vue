@@ -32,6 +32,7 @@
       color="blue lighten-1"
       v-model="menuVisible"
       v-if="$store.state.authenticated"
+      disable-resize-watcher
     >
       <v-list>
         <v-list-item>
@@ -65,14 +66,14 @@
         </v-list-item>
 
         <v-divider
-          v-if="pinnedItems.length > 0"
+          v-if="$store.state.pinnedActivities.length > 0"
           key="devider2"
           class="my-5"
           color="white"
         ></v-divider>
 
         <v-list-item
-          v-for="pinnedItem in pinnedItems"
+          v-for="pinnedItem in $store.state.pinnedActivities"
           :key="pinnedItem.name"
           router
           :to="`/activity/${pinnedItem.id}`"
@@ -103,7 +104,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-overlay :value="loader">
+    <v-overlay :value="$store.state.loader">
       <v-progress-circular indeterminate size="64"></v-progress-circular>
     </v-overlay>
 
@@ -111,15 +112,12 @@
       <router-view
         :key="$route.fullPath"
         @updatePinned="updatePinned"
-        @loaderOn="loader = true"
-        @loaderOff="loader = false"
       ></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import { getPinnedActivities } from "../services";
 export default {
   name: "App",
 
@@ -134,10 +132,7 @@ export default {
 
   async mounted() {
     this.profile = this.$store.state.user;
-
-    this.$api(async () => {
-      await this.updatePinned();
-    });
+    await this.updatePinned();
   },
 
   methods: {
@@ -146,15 +141,11 @@ export default {
     },
 
     async updatePinned() {
-      this.$api(async () => {
-        this.pinnedItems = await getPinnedActivities();
-      });
+      this.$store.dispatch("fetchPinnedActivities");
     },
 
     async onLogout() {
-      this.$api(async () => {
-        this.$store.dispatch("logout");
-      });
+      this.$store.dispatch("logout");
     },
   },
 };

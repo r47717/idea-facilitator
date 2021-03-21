@@ -138,11 +138,7 @@
 </template>
 
 <script>
-import {
-  getActivityById,
-  getTasksByActivity,
-  updateActivity,
-} from "../services";
+import { getActivityById, getTasksByActivity } from "../services";
 export default {
   data() {
     return {
@@ -216,14 +212,15 @@ export default {
   methods: {
     async onSaveChanges() {
       if (this.$refs.form.validate()) {
-        this.$api(async () => {
-          this.snackBarText = "Saving changes...";
-          this.snackbar = true;
-          await updateActivity(this.data.id, this.form);
-          this.data = await getActivityById(Number(this.$route.params.id));
-          this.snackBarText = "Changes saved successfully";
-          this.$emit("updatePinned");
+        this.snackBarText = "Saving changes...";
+        this.snackbar = true;
+        this.$store.dispatch("updateActivity", {
+          id: this.data.id,
+          data: this.form,
         });
+        this.data = await getActivityById(Number(this.$route.params.id));
+        this.snackBarText = "Changes saved successfully";
+        this.$emit("updatePinned");
       }
     },
 

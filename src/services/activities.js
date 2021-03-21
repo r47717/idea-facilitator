@@ -1,3 +1,5 @@
+import { delay } from "./utils";
+
 const activities = [
   {
     id: 1,
@@ -48,10 +50,6 @@ const activities = [
 
 let latestId = activities[activities.length - 1].id;
 
-async function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export async function getActivities() {
   await delay(300);
   return activities;
@@ -63,8 +61,14 @@ export async function getActivityById(id) {
 }
 
 export async function addNewActivity(data) {
+  if (!data) {
+    console.error("empty data for a new activity");
+    return;
+  }
+
   await delay(500);
   activities.push({ ...data, id: ++latestId });
+  console.log(data, activities);
 }
 
 export async function updateActivity(id, data) {
